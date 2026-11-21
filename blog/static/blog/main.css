@@ -1,84 +1,523 @@
+/* =========================================================
+   Wall-E — thème solarpunk
+   Palette : mousse, feuille, soleil, vert-de-gris, ciel
+   ========================================================= */
+ 
+:root {
+  --moss:      #1F3D2B;   /* texte, navbar */
+  --moss-2:    #2C5A3E;
+  --leaf:      #4E8B3A;   /* actions principales */
+  --leaf-soft: #DDEFCF;
+  --sun:       #F2B33D;   /* accent, soleil, focus */
+  --sun-soft:  #FFF1CC;
+  --verdigris: #2F9E8F;   /* données robots */
+  --sky:       #E4F3EE;   /* fond */
+  --paper:     #FBFDF7;   /* cartes */
+  --rust:      #B5502E;   /* zones critiques / danger */
+  --ink-soft:  #5B6F60;
+ 
+  --radius-leaf: 22px 4px 22px 4px;   /* forme "feuille" */
+  --radius:      14px;
+  --shadow:      0 6px 0 -2px rgba(31, 61, 43, .12);
+ 
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --font-body:    "Atkinson Hyperlegible", "Segoe UI", sans-serif;
+}
+ 
+/* ---------- Base ---------- */
+ 
 body {
-  background: #fafafa;
-  color: #333333;
-  margin-top: 5rem;
+  margin-top: 6rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--moss);
+  background-color: var(--sky);
+  /* motif discret de feuilles + halo de soleil en haut à droite */
+  background-image:
+    radial-gradient(circle at 92% -10%, rgba(242, 179, 61, .35), transparent 38%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%234E8B3A' stroke-opacity='.08' stroke-width='1.5'%3E%3Cpath d='M20 70c10-25 35-30 45-28-2 12-12 34-45 28z'/%3E%3Cpath d='M20 70 50 50'/%3E%3Cpath d='M85 25c6-12 20-14 26-12-1 7-8 18-26 12z'/%3E%3C/g%3E%3C/svg%3E");
+  background-attachment: fixed;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-
+ 
+main { flex: 1; }
+ 
 h1, h2, h3, h4, h5, h6 {
-  color: #444444;
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--moss);
+  letter-spacing: -0.01em;
+  line-height: 1.15;
 }
-
-ul {
-  margin: 0;
+ 
+h1 { font-size: 2.6rem; }
+h2 { font-size: 1.9rem; }
+h3 { font-size: 1.4rem; }
+ 
+a { color: var(--leaf); }
+a:hover { color: var(--moss-2); }
+ 
+ul { margin: 0; }
+ 
+::selection { background: var(--sun); color: var(--moss); }
+ 
+:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
-
+ 
+/* ---------- Navbar (nom de classe conservé pour Bootstrap) ---------- */
+ 
 .bg-steel {
-  background-color: #5f788a;
+  background-color: var(--moss);
 }
-
+ 
+.site-header .navbar {
+  padding-top: .7rem;
+  padding-bottom: .7rem;
+}
+ 
+/* bordure ondulée "colline" sous la navbar */
+.site-header .navbar::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: -14px;
+  height: 15px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 15' preserveAspectRatio='none'%3E%3Cpath d='M0 0h160v4c-20 0-20 10-40 10S100 4 80 4 60 14 40 14 20 4 0 4z' fill='%231F3D2B'/%3E%3C/svg%3E") repeat-x;
+  background-size: 160px 15px;
+  pointer-events: none;
+}
+ 
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: var(--sun-soft) !important;
+  letter-spacing: -0.02em;
+}
+ 
+/* Le soleil du logo : seul moment animé de la page */
+.brand-sun {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+}
+ 
+.brand-sun .rays {
+  transform-origin: 50% 50%;
+  animation: sun-spin 40s linear infinite;
+}
+ 
+.brand-sun .core {
+  animation: sun-rise 1.4s cubic-bezier(.2, .9, .3, 1.2) both;
+}
+ 
+@keyframes sun-rise {
+  from { transform: translateY(14px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+ 
+@keyframes sun-spin {
+  to { transform: rotate(360deg); }
+}
+ 
 .site-header .navbar-nav .nav-link {
-  color: #cbd5db;
+  color: #C9DCC8;
+  font-weight: 700;
+  padding: .4rem .9rem !important;
+  border-radius: 999px;
+  transition: background-color .2s, color .2s;
 }
-
+ 
 .site-header .navbar-nav .nav-link:hover {
-  color: #ffffff;
+  color: var(--moss);
+  background-color: var(--leaf-soft);
 }
-
+ 
 .site-header .navbar-nav .nav-link.active {
-  font-weight: 500;
+  color: var(--moss);
+  background-color: var(--sun);
 }
-
+ 
+/* bouton d'action mis en avant dans la nav (ex. "Nouvelle zone") */
+.site-header .navbar-nav .nav-link.nav-cta {
+  background-color: var(--sun);
+  color: var(--moss);
+  margin-right: .4rem;
+}
+ 
+.site-header .navbar-nav .nav-link.nav-cta:hover {
+  background-color: var(--sun-soft);
+}
+ 
+/* ---------- Bandeau d'accueil ---------- */
+ 
+.hero {
+  position: relative;
+  padding: 2.4rem 2rem 2rem;
+  margin-bottom: 2rem;
+  background: var(--moss);
+  color: var(--sun-soft);
+  border-radius: 40px 6px 40px 6px;
+  overflow: hidden;
+}
+ 
+.hero h1 {
+  color: var(--paper);
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  max-width: 16ch;
+}
+ 
+.hero p {
+  max-width: 52ch;
+  color: #C9DCC8;
+  font-size: 1.15rem;
+}
+ 
+/* collines stylisées en bas du bandeau */
+.hero::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 60px;
+  background:
+    radial-gradient(120% 100% at 20% 100%, var(--leaf) 50%, transparent 51%),
+    radial-gradient(90% 100% at 85% 100%, var(--moss-2) 50%, transparent 51%);
+  opacity: .9;
+}
+ 
+.hero-stats {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1.4rem;
+  padding-bottom: 2.2rem;
+}
+ 
+.hero-stats strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 2rem;
+  color: var(--sun);
+  line-height: 1;
+}
+ 
+/* ---------- Sections / cartes ---------- */
+ 
 .content-section {
-  background: #ffffff;
-  padding: 10px 20px;
-  border: 1px solid #dddddd;
-  border-radius: 3px;
-  margin-bottom: 20px;
+  background: var(--paper);
+  padding: 1.4rem 1.6rem;
+  border: 2px solid var(--leaf-soft);
+  border-radius: var(--radius-leaf);
+  box-shadow: var(--shadow);
+  margin-bottom: 1.5rem;
 }
-
+ 
+.content-section legend {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--moss);
+}
+ 
+/* ---------- Articles / relevés (classes existantes conservées) ---------- */
+ 
 .article-title {
-  color: #444444;
+  font-family: var(--font-display);
+  color: var(--moss);
 }
-
+ 
 a.article-title:hover {
-  color: #428bca;
+  color: var(--leaf);
   text-decoration: none;
 }
-
+ 
 .article-content {
   white-space: pre-line;
 }
-
+ 
 .article-img {
   height: 65px;
   width: 65px;
   margin-right: 16px;
+  border: 3px solid var(--sun);
+  object-fit: cover;
 }
-
+ 
 .article-metadata {
-  padding-bottom: 1px;
-  margin-bottom: 4px;
-  border-bottom: 1px solid #e3e3e3
+  padding-bottom: 4px;
+  margin-bottom: 8px;
+  border-bottom: 2px dashed var(--leaf-soft);
+  color: var(--ink-soft);
+  font-size: .92rem;
 }
-
+ 
+.article-metadata a { font-weight: 700; color: var(--moss-2); }
+ 
 .article-metadata a:hover {
-  color: #333;
+  color: var(--leaf);
   text-decoration: none;
 }
-
+ 
 .article-svg {
   width: 25px;
   height: 25px;
   vertical-align: middle;
 }
-
+ 
+/* ---------- Carte zone ---------- */
+ 
+.zone-card {
+  position: relative;
+  background: var(--paper);
+  border: 2px solid var(--leaf-soft);
+  border-radius: var(--radius-leaf);
+  padding: 1.2rem 1.4rem 1.2rem 1.6rem;
+  margin-bottom: 1.2rem;
+  box-shadow: var(--shadow);
+  transition: transform .2s, border-color .2s;
+}
+ 
+.zone-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--leaf);
+}
+ 
+/* jauge verticale de pollution à gauche de la carte */
+.zone-card::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 14px; bottom: 14px;
+  width: 6px;
+  border-radius: 0 6px 6px 0;
+  background: var(--leaf);
+}
+ 
+.zone-card.zone-moyen::before   { background: var(--sun); }
+.zone-card.zone-critique::before { background: var(--rust); }
+ 
+.zone-card h3 { margin-bottom: .25rem; }
+ 
+/* ---------- Badges d'état ---------- */
+ 
+.badge-state {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .2rem .75rem;
+  border-radius: 999px;
+  font-size: .85rem;
+  font-weight: 700;
+}
+ 
+.badge-state::before {
+  content: "";
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+ 
+.badge-a-traiter { background: #FBE3DA; color: #7A2E15; }
+.badge-en-cours  { background: var(--sun-soft); color: #6B4A05; }
+.badge-traitee   { background: var(--leaf-soft); color: #234A17; }
+ 
+/* Robot en ligne : point qui "respire" */
+.robot-status {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  font-size: .9rem;
+  color: var(--verdigris);
+  font-weight: 700;
+}
+ 
+.robot-status::before {
+  content: "";
+  width: .6rem;
+  height: .6rem;
+  border-radius: 50%;
+  background: var(--verdigris);
+  box-shadow: 0 0 0 0 rgba(47, 158, 143, .6);
+  animation: robot-ping 2s infinite;
+}
+ 
+.robot-status.offline { color: var(--ink-soft); }
+.robot-status.offline::before { background: var(--ink-soft); animation: none; }
+ 
+@keyframes robot-ping {
+  70%  { box-shadow: 0 0 0 8px rgba(47, 158, 143, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(47, 158, 143, 0); }
+}
+ 
+/* Barre de mesure (niveau de pollution, qualité de l'air...) */
+.meter {
+  height: 10px;
+  background: var(--leaf-soft);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: .5rem 0;
+}
+ 
+.meter > span {
+  display: block;
+  height: 100%;
+  background: var(--leaf);
+  border-radius: 999px;
+}
+ 
+.zone-moyen .meter > span    { background: var(--sun); }
+.zone-critique .meter > span { background: var(--rust); }
+ 
+/* ---------- Boutons (surcharge Bootstrap) ---------- */
+ 
+.btn {
+  font-weight: 700;
+  border-radius: 999px;
+  padding: .45rem 1.2rem;
+  border-width: 2px;
+}
+ 
+.btn-primary,
+.btn-info {
+  background-color: var(--leaf);
+  border-color: var(--leaf);
+  color: #fff;
+}
+ 
+.btn-primary:hover,
+.btn-info:hover,
+.btn-primary:focus {
+  background-color: var(--moss-2);
+  border-color: var(--moss-2);
+}
+ 
+.btn-outline-info,
+.btn-outline-primary {
+  color: var(--leaf);
+  border-color: var(--leaf);
+}
+ 
+.btn-outline-info:hover,
+.btn-outline-primary:hover {
+  background-color: var(--leaf);
+  border-color: var(--leaf);
+  color: #fff;
+}
+ 
+.btn-warning {
+  background-color: var(--sun);
+  border-color: var(--sun);
+  color: var(--moss);
+}
+ 
+.btn-danger {
+  background-color: var(--rust);
+  border-color: var(--rust);
+}
+ 
+.btn-secondary {
+  background-color: transparent;
+  border-color: var(--ink-soft);
+  color: var(--ink-soft);
+}
+ 
+/* ---------- Formulaires ---------- */
+ 
+.form-control {
+  border: 2px solid var(--leaf-soft);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--moss);
+}
+ 
+.form-control:focus {
+  border-color: var(--leaf);
+  box-shadow: 0 0 0 .2rem rgba(242, 179, 61, .45);
+}
+ 
+label { font-weight: 700; }
+ 
+/* ---------- Alertes Django messages ---------- */
+ 
+.alert {
+  border: none;
+  border-radius: var(--radius-leaf);
+  border-left: 0;
+  font-weight: 700;
+}
+ 
+.alert-success { background: var(--leaf-soft); color: #234A17; }
+.alert-info    { background: #D6EFEB; color: #145249; }
+.alert-warning { background: var(--sun-soft); color: #6B4A05; }
+.alert-danger,
+.alert-error   { background: #FBE3DA; color: #7A2E15; }
+ 
+/* ---------- Listes ---------- */
+ 
+.list-group-item {
+  border-color: var(--leaf-soft);
+  background: var(--paper);
+}
+ 
+/* ---------- Profil ---------- */
+ 
 .account-img {
   height: 125px;
   width: 125px;
   margin-right: 20px;
   margin-bottom: 16px;
+  border: 4px solid var(--sun);
+  object-fit: cover;
 }
-
+ 
 .account-heading {
+  font-family: var(--font-display);
   font-size: 2.5rem;
 }
+ 
+/* ---------- Pied de page ---------- */
+ 
+.site-footer {
+  margin-top: 3rem;
+  padding: 2.4rem 0 1.6rem;
+  background: var(--moss);
+  color: #C9DCC8;
+  position: relative;
+}
+ 
+.site-footer::before {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: -14px;
+  height: 15px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 15' preserveAspectRatio='none'%3E%3Cpath d='M0 15h160v-4c-20 0-20-10-40-10s-20 10-40 10S60 1 40 1 20 11 0 11z' fill='%231F3D2B'/%3E%3C/svg%3E") repeat-x;
+  background-size: 160px 15px;
+}
+ 
+.site-footer a { color: var(--sun); }
+ 
+/* ---------- Responsive & accessibilité ---------- */
+ 
+@media (max-width: 767px) {
+  body { margin-top: 5.5rem; }
+  h1 { font-size: 2rem; }
+  .hero { padding: 1.8rem 1.3rem 1.5rem; }
+  .site-header .navbar-nav .nav-link { margin: .15rem 0; }
+}
+ 
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+ 
