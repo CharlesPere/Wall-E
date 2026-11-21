@@ -15,6 +15,15 @@ from .models import Mesure, Rapport
 CHAMPS = ['temperature', 'humidite', 'oxygene', 'co2']
 
 
+def duree_analyse(zone):
+    """Durée (en secondes) de la mission du robot, selon la zone.
+    - si la taille est renseignée : 10 s + 1 s par unité de taille (max 60 s)
+    - sinon : durée fixe propre à chaque zone, entre 10 et 40 s"""
+    if zone.size_zone:
+        return int(min(60, max(10, 10 + zone.size_zone)))
+    return 10 + (zone.pk * 7919) % 31
+
+
 @login_required
 def zone_analyse(request, pk):
     zone = get_object_or_404(Zone, pk=pk)
@@ -33,6 +42,7 @@ def zone_analyse(request, pk):
     return render(request, 'analyse/zone_analyse.html', {
         'title': 'Analyse',
         'zone': zone,
+        'duree_analyse': duree_analyse(zone),
         'derniere': derniere,
         'alertes': derniere.alertes() if derniere else [],
         'stats': stats,

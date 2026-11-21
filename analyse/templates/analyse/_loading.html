@@ -1,0 +1,257 @@
+<!-- Barre de chargement solarpunk : s'active sur tout <form data-loading="..."> -->
+<style>
+  .sp-overlay {
+    position: fixed; inset: 0; z-index: 2000;
+    display: none; align-items: center; justify-content: center;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(255, 236, 179, .55), transparent 60%),
+      rgba(22, 48, 32, .55);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    overflow: hidden;
+  }
+  .sp-overlay.sp-show { display: flex; animation: sp-fade .4s ease-out; }
+  @keyframes sp-fade { from { opacity: 0; } to { opacity: 1; } }
+
+  .sp-card {
+    position: relative; width: min(540px, 92vw);
+    padding: 28px 30px 24px;
+    background: linear-gradient(180deg, #fffbef 0%, #f3f7e6 100%);
+    border: 2px solid #d9b44a; border-radius: 28px;
+    box-shadow: 0 20px 60px rgba(10, 40, 20, .35), inset 0 0 0 6px rgba(217, 180, 74, .12);
+    font-family: Georgia, "Times New Roman", serif; color: #24452c;
+    text-align: center;
+  }
+  .sp-card::before, .sp-card::after {           /* coins art nouveau */
+    content: ""; position: absolute; width: 46px; height: 46px;
+    border: 2px solid #7bb662; border-radius: 0 100% 0 100%;
+    opacity: .55;
+  }
+  .sp-card::before { top: 10px; left: 10px; }
+  .sp-card::after  { bottom: 10px; right: 10px; transform: rotate(180deg); }
+
+  /* Soleil + collines */
+  .sp-scene { position: relative; height: 96px; margin: -6px auto 6px; width: 220px; }
+  .sp-sun { position: absolute; left: 50%; top: 4px; width: 70px; height: 70px; margin-left: -35px;
+            animation: sp-spin 18s linear infinite; }
+  @keyframes sp-spin { to { transform: rotate(360deg); } }
+  .sp-hills { position: absolute; bottom: 0; left: 0; width: 100%; height: 44px; }
+  .sp-panel { position: absolute; bottom: 14px; left: 36px; width: 34px; height: 18px; }
+  .sp-robot { position: absolute; bottom: 22px; left: 150px; width: 30px; height: 30px;
+              animation: sp-hover 2.4s ease-in-out infinite; }
+  @keyframes sp-hover { 50% { transform: translateY(-6px); } }
+
+  .sp-title { font-size: 1.25rem; font-weight: bold; margin: 0 0 2px; }
+  .sp-sub   { font-size: .85rem; color: #6b7f4f; margin-bottom: 18px; font-style: italic; }
+
+  /* Barre */
+  .sp-track {
+    position: relative; height: 24px; border-radius: 999px;
+    background: #e3ebcf; box-shadow: inset 0 2px 5px rgba(36, 69, 44, .25);
+    border: 1px solid #c6d6a6; overflow: visible;
+  }
+  .sp-fill {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 0%;
+    border-radius: 999px;
+    background:
+      repeating-linear-gradient(135deg, rgba(255,255,255,.22) 0 10px, transparent 10px 20px),
+      linear-gradient(90deg, #2f7a45 0%, #5fa34f 45%, #a7c957 75%, #e9c46a 100%);
+    background-size: 28px 28px, 100% 100%;
+    animation: sp-stripes 1s linear infinite;
+    box-shadow: 0 0 14px rgba(167, 201, 87, .7);
+  }
+  @keyframes sp-stripes { to { background-position: 28px 0, 0 0; } }
+  .sp-sprout {                                   /* pousse au bout de la barre */
+    position: absolute; top: -26px; width: 30px; height: 30px; margin-left: -15px; left: 0%;
+    transform-origin: 50% 100%; animation: sp-sway 1.8s ease-in-out infinite;
+    filter: drop-shadow(0 2px 2px rgba(0,0,0,.2));
+  }
+  @keyframes sp-sway { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+
+  /* Petites feuilles qui poussent le long de la barre */
+  .sp-leaf {
+    position: absolute; bottom: -12px; width: 12px; height: 12px;
+    background: #5fa34f; border-radius: 0 100% 0 100%;
+    transform: scale(0) rotate(45deg); transition: transform .5s cubic-bezier(.3,1.6,.5,1);
+  }
+  .sp-leaf.sp-up { top: -12px; bottom: auto; background: #7bb662; }
+  .sp-leaf.sp-grown { transform: scale(1) rotate(45deg); }
+
+  .sp-info { display: flex; justify-content: space-between; margin-top: 22px; font-size: .9rem; }
+  .sp-pct  { font-weight: bold; color: #2f7a45; font-size: 1.1rem; }
+  .sp-msg  { min-height: 1.4em; margin-top: 10px; color: #3d5a32; transition: opacity .3s; }
+  .sp-time { color: #8a7a3a; }
+
+  /* Pollen qui flotte */
+  .sp-pollen { position: absolute; bottom: -10px; width: 6px; height: 6px; border-radius: 50%;
+               background: rgba(233, 196, 106, .85); box-shadow: 0 0 8px rgba(233,196,106,.9);
+               animation: sp-float linear infinite; }
+  @keyframes sp-float { to { transform: translate(var(--dx), -110vh); opacity: 0; } }
+
+  .sp-done .sp-fill { animation: none; background: linear-gradient(90deg, #2f7a45, #e9c46a); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sp-sun, .sp-robot, .sp-sprout, .sp-fill, .sp-pollen { animation: none !important; }
+  }
+</style>
+
+<div class="sp-overlay" id="sp-overlay" aria-hidden="true">
+  <div class="sp-card">
+    <div class="sp-scene">
+      <svg class="sp-sun" viewBox="0 0 100 100" aria-hidden="true">
+        <g stroke="#e9b949" stroke-width="5" stroke-linecap="round">
+          <line x1="50" y1="4" x2="50" y2="18"/><line x1="50" y1="82" x2="50" y2="96"/>
+          <line x1="4" y1="50" x2="18" y2="50"/><line x1="82" y1="50" x2="96" y2="50"/>
+          <line x1="17" y1="17" x2="27" y2="27"/><line x1="73" y1="73" x2="83" y2="83"/>
+          <line x1="17" y1="83" x2="27" y2="73"/><line x1="73" y1="27" x2="83" y2="17"/>
+        </g>
+        <circle cx="50" cy="50" r="22" fill="#f4c95d" stroke="#e0a83a" stroke-width="3"/>
+      </svg>
+      <svg class="sp-hills" viewBox="0 0 220 44" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 44 C30 10 70 10 100 30 C130 6 180 8 220 28 L220 44 Z" fill="#7bb662"/>
+        <path d="M0 44 C50 24 90 30 120 38 C160 26 200 30 220 40 L220 44 Z" fill="#3f8a4f"/>
+      </svg>
+      <svg class="sp-panel" viewBox="0 0 34 18" aria-hidden="true">
+        <rect x="1" y="1" width="32" height="12" rx="2" fill="#2d5d7b" stroke="#d9b44a" stroke-width="1.5"/>
+        <line x1="11" y1="1" x2="11" y2="13" stroke="#8fc1d9"/><line x1="22" y1="1" x2="22" y2="13" stroke="#8fc1d9"/>
+        <line x1="17" y1="13" x2="17" y2="18" stroke="#5a4a2a" stroke-width="2"/>
+      </svg>
+      <svg class="sp-robot" viewBox="0 0 30 30" aria-hidden="true">
+        <line x1="15" y1="2" x2="15" y2="8" stroke="#5a4a2a" stroke-width="1.5"/>
+        <circle cx="15" cy="2.5" r="2" fill="#e9c46a"/>
+        <rect x="5" y="8" width="20" height="14" rx="6" fill="#fffbef" stroke="#2f7a45" stroke-width="2"/>
+        <circle cx="11" cy="15" r="2" fill="#2f7a45"/><circle cx="19" cy="15" r="2" fill="#2f7a45"/>
+        <path d="M2 14 Q5 10 5 14 M28 14 Q25 10 25 14" stroke="#7bb662" stroke-width="2" fill="none"/>
+        <ellipse cx="15" cy="27" rx="7" ry="1.5" fill="rgba(0,0,0,.15)"/>
+      </svg>
+    </div>
+
+    <p class="sp-title" id="sp-title">Chargement…</p>
+    <div class="sp-sub" id="sp-sub">Énergie 100 % solaire</div>
+
+    <div class="sp-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="sp-track">
+      <div class="sp-fill" id="sp-fill"></div>
+      <svg class="sp-sprout" id="sp-sprout" viewBox="0 0 30 30" aria-hidden="true">
+        <path d="M15 30 V14" stroke="#2f7a45" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M15 17 C6 17 3 9 4 5 C10 5 15 9 15 17 Z" fill="#5fa34f"/>
+        <path d="M15 14 C24 14 27 6 26 2 C20 2 15 6 15 14 Z" fill="#a7c957"/>
+      </svg>
+    </div>
+
+    <div class="sp-msg" id="sp-msg"></div>
+    <div class="sp-info">
+      <span class="sp-pct" id="sp-pct">0 %</span>
+      <span class="sp-time" id="sp-time"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  if (window.__spLoadingReady) return;
+  window.__spLoadingReady = true;
+
+  var MESSAGES = {
+    analyse: [
+      "Recharge des panneaux solaires du robot…",
+      "Décollage silencieux au-dessus de la canopée…",
+      "Cartographie de la zone…",
+      "Relevé de la température…",
+      "Mesure de l'humidité du sol…",
+      "Analyse de l'oxygène et du CO₂…",
+      "Retour à la station verte…",
+      "Transmission des données…"
+    ],
+    rapport: [
+      "Compilation des mesures…",
+      "Croisement avec l'historique de la zone…",
+      "Évaluation des risques environnementaux…",
+      "Rédaction du rapport…",
+      "Vérification par le conseil des jardiniers…",
+      "Archivage dans la biothèque…"
+    ]
+  };
+
+  var overlay = document.getElementById('sp-overlay');
+  var fill = document.getElementById('sp-fill');
+  var sprout = document.getElementById('sp-sprout');
+  var track = document.getElementById('sp-track');
+  var pct = document.getElementById('sp-pct');
+  var msg = document.getElementById('sp-msg');
+  var time = document.getElementById('sp-time');
+  var title = document.getElementById('sp-title');
+
+  // Feuilles le long de la barre
+  var leaves = [];
+  for (var i = 1; i <= 11; i++) {
+    var leaf = document.createElement('span');
+    leaf.className = 'sp-leaf' + (i % 2 ? ' sp-up' : '');
+    leaf.style.left = (i * 8) + '%';
+    leaf.dataset.at = i * 8;
+    track.appendChild(leaf);
+    leaves.push(leaf);
+  }
+
+  function pollen() {
+    for (var i = 0; i < 18; i++) {
+      var p = document.createElement('span');
+      p.className = 'sp-pollen';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.setProperty('--dx', (Math.random() * 120 - 60) + 'px');
+      p.style.animationDuration = (6 + Math.random() * 8) + 's';
+      p.style.animationDelay = (-Math.random() * 10) + 's';
+      overlay.appendChild(p);
+    }
+  }
+
+  function start(form) {
+    var type = form.dataset.loading;
+    var secs = parseFloat(form.dataset.loadingSeconds);
+    if (!secs) {
+      var min = parseFloat(form.dataset.loadingMin || 15);
+      var max = parseFloat(form.dataset.loadingMax || 60);
+      secs = min + Math.random() * (max - min);
+    }
+    var list = MESSAGES[type] || MESSAGES.analyse;
+    title.textContent = form.dataset.loadingTitle || 'Chargement…';
+    overlay.classList.add('sp-show');
+    overlay.setAttribute('aria-hidden', 'false');
+    pollen();
+
+    var t0 = performance.now(), dur = secs * 1000, lastMsg = -1;
+    function frame(now) {
+      var t = Math.min(1, (now - t0) / dur);
+      // progression organique : rapide au début, ralentit, puis finit
+      var p = 0.55 * t + 0.45 * (0.5 - Math.cos(Math.PI * t) / 2);
+      var val = Math.round(p * 100);
+      fill.style.width = val + '%';
+      sprout.style.left = val + '%';
+      track.setAttribute('aria-valuenow', val);
+      pct.textContent = val + ' %';
+      time.textContent = t < 1 ? Math.ceil((dur - (now - t0)) / 1000) + ' s restantes' : '';
+      leaves.forEach(function (l) { if (val >= +l.dataset.at) l.classList.add('sp-grown'); });
+
+      var idx = Math.min(list.length - 1, Math.floor(t * list.length));
+      if (idx !== lastMsg) { lastMsg = idx; msg.textContent = list[idx]; }
+
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        overlay.querySelector('.sp-card').classList.add('sp-done');
+        msg.textContent = '🌱 Terminé !';
+        setTimeout(function () { HTMLFormElement.prototype.submit.call(form); }, 600);
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  document.querySelectorAll('form[data-loading]').forEach(function (form) {
+    form.addEventListener('submit', function (e) {
+      if (form.dataset.spRunning) return e.preventDefault();
+      e.preventDefault();
+      form.dataset.spRunning = '1';
+      start(form);
+    });
+  });
+})();
+</script>
