@@ -6,8 +6,15 @@ class Zone(models.Model):
 
     STATUS_CHOICES = [
         ("ACTIVE", "Active"),
-        ("ANALYSE", "En analyse"),
-        ("SUSPENDUE", "Suspendue"),
+        ("ANALYSIS", "Under analysis"),
+        ("SUSPENDED", "Suspended"),
+    ]
+
+    TYPE_EREA = [
+        ("WOODS", "Woods"),
+        ("RIVER", "River"),
+        ("MEADOW", "Meadow"),
+        ("AGRICULTURE_FIELD", "Agriculture field")
     ]
 
     user = models.ForeignKey(
@@ -30,6 +37,12 @@ class Zone(models.Model):
         max_length=20,
         choices=STATUS_CHOICES,
         default="ACTIVE"
+    )
+
+    type_area = models.CharField(
+        max_length=20, 
+        choices=TYPE_EREA,
+        default="WOODS"
     )
 
     date_creation = models.DateTimeField(

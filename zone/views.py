@@ -35,7 +35,14 @@ class ZoneDetailView(DetailView):
 
 class ZoneCreateView(LoginRequiredMixin, CreateView):
     model = Zone
-    fields = ['name_zone', 'description']
+    fields = [
+        'name_zone', 
+        'description',
+        'localisation', 
+        'size_zone',
+        'statut',
+        'type_area'
+    ]
 
     def form_valid(self, form):
         form.instance.user = self.request.user
@@ -44,7 +51,14 @@ class ZoneCreateView(LoginRequiredMixin, CreateView):
 
 class ZoneUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Zone
-    fields = ['name_zone', 'description']
+    fields = [
+        'name_zone', 
+        'description',
+        'localisation', 
+        'size_zone',
+        'statut',
+        'type_area'
+    ]
 
     def form_valid(self, form):
         form.instance.user = self.request.user
