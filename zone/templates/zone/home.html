@@ -1,0 +1,16 @@
+{% extends "zone/base.html" %}
+{% block content %}
+    {% for zone in zones %}
+        <article class="media content-section">
+          <img class="rounded-circle article-img" src="{{ zone.user.profile.image.url }}">
+          <div class="media-body">
+            <div class="article-metadata">
+              <a class="mr-2" href="#">{{ zone.user }}</a>
+              <small class="text-muted">{{ zone.date_creation|date:"F d, Y" }}</small>
+            </div>
+            <h2><a class="article-title" href="{% url 'zone-detail' zone.id %}">{{ zone.name_zone }}</a></h2>
+            <p class="article-content">{{ zone.description }}</p>
+          </div>
+        </article>
+    {% endfor %}
+{% endblock content %}
