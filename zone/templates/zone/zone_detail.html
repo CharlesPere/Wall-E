@@ -7,8 +7,8 @@
         <a class="mr-2" href="#">{{ object.user }}</a>
         <small class="text-muted">{{ object.date_creation|date:"F d, Y" }}</small>
         <div>
-          <a class="btn btn-info btn-sm mt-1 mb-1" href="{% url 'zone-analyse' object.id %}">Analyse</a>
-          <a class="btn btn-warning btn-sm mt-1 mb-1" href="{% url 'zone-traitement' object.id %}">Traitement</a>
+          <a class="btn btn-info btn-sm mt-1 mb-1" href="{% url 'zone-analysis' object.id %}">Analysis</a>
+          <a class="btn btn-warning btn-sm mt-1 mb-1" href="{% url 'zone-treatment' object.id %}">Treatment</a>
           {% if object.user == user %}
             <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'zone-update' object.id %}">Update</a>
             <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'zone-delete' object.id %}">Delete</a>

@@ -1,4 +1,4 @@
-<!-- Barre de chargement solarpunk : s'active sur tout <form data-loading="..."> -->
+<!-- Solarpunk loading bar: activates on any <form data-loading="..."> -->
 <style>
   .sp-overlay {
     position: fixed; inset: 0; z-index: 2000;
@@ -22,7 +22,7 @@
     font-family: Georgia, "Times New Roman", serif; color: #24452c;
     text-align: center;
   }
-  .sp-card::before, .sp-card::after {           /* coins art nouveau */
+  .sp-card::before, .sp-card::after {           /* art nouveau corners */
     content: ""; position: absolute; width: 46px; height: 46px;
     border: 2px solid #7bb662; border-radius: 0 100% 0 100%;
     opacity: .55;
@@ -30,7 +30,7 @@
   .sp-card::before { top: 10px; left: 10px; }
   .sp-card::after  { bottom: 10px; right: 10px; transform: rotate(180deg); }
 
-  /* Soleil + collines */
+  /* Sun + hills */
   .sp-scene { position: relative; height: 96px; margin: -6px auto 6px; width: 220px; }
   .sp-sun { position: absolute; left: 50%; top: 4px; width: 70px; height: 70px; margin-left: -35px;
             animation: sp-spin 18s linear infinite; }
@@ -44,7 +44,7 @@
   .sp-title { font-size: 1.25rem; font-weight: bold; margin: 0 0 2px; }
   .sp-sub   { font-size: .85rem; color: #6b7f4f; margin-bottom: 18px; font-style: italic; }
 
-  /* Barre */
+  /* Bar */
   .sp-track {
     position: relative; height: 24px; border-radius: 999px;
     background: #e3ebcf; box-shadow: inset 0 2px 5px rgba(36, 69, 44, .25);
@@ -61,14 +61,14 @@
     box-shadow: 0 0 14px rgba(167, 201, 87, .7);
   }
   @keyframes sp-stripes { to { background-position: 28px 0, 0 0; } }
-  .sp-sprout {                                   /* pousse au bout de la barre */
+  .sp-sprout {                                   /* sprout at the end of the bar */
     position: absolute; top: -26px; width: 30px; height: 30px; margin-left: -15px; left: 0%;
     transform-origin: 50% 100%; animation: sp-sway 1.8s ease-in-out infinite;
     filter: drop-shadow(0 2px 2px rgba(0,0,0,.2));
   }
   @keyframes sp-sway { 0%,100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
 
-  /* Petites feuilles qui poussent le long de la barre */
+  /* Small leaves growing along the bar */
   .sp-leaf {
     position: absolute; bottom: -12px; width: 12px; height: 12px;
     background: #5fa34f; border-radius: 0 100% 0 100%;
@@ -82,7 +82,7 @@
   .sp-msg  { min-height: 1.4em; margin-top: 10px; color: #3d5a32; transition: opacity .3s; }
   .sp-time { color: #8a7a3a; }
 
-  /* Pollen qui flotte */
+  /* Floating pollen */
   .sp-pollen { position: absolute; bottom: -10px; width: 6px; height: 6px; border-radius: 50%;
                background: rgba(233, 196, 106, .85); box-shadow: 0 0 8px rgba(233,196,106,.9);
                animation: sp-float linear infinite; }
@@ -126,8 +126,8 @@
       </svg>
     </div>
 
-    <p class="sp-title" id="sp-title">Chargement…</p>
-    <div class="sp-sub" id="sp-sub">Énergie 100 % solaire</div>
+    <p class="sp-title" id="sp-title">Loading…</p>
+    <div class="sp-sub" id="sp-sub">100% solar powered</div>
 
     <div class="sp-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="sp-track">
       <div class="sp-fill" id="sp-fill"></div>
@@ -152,23 +152,23 @@
   window.__spLoadingReady = true;
 
   var MESSAGES = {
-    analyse: [
-      "Recharge des panneaux solaires du robot…",
-      "Décollage silencieux au-dessus de la canopée…",
-      "Cartographie de la zone…",
-      "Relevé de la température…",
-      "Mesure de l'humidité du sol…",
-      "Analyse de l'oxygène et du CO₂…",
-      "Retour à la station verte…",
-      "Transmission des données…"
+    analysis: [
+      "Charging the robot's solar panels…",
+      "Silent take-off above the canopy…",
+      "Mapping the zone…",
+      "Reading the temperature…",
+      "Measuring soil humidity…",
+      "Analysing oxygen and CO₂…",
+      "Returning to the green station…",
+      "Sending data…"
     ],
-    rapport: [
-      "Compilation des mesures…",
-      "Croisement avec l'historique de la zone…",
-      "Évaluation des risques environnementaux…",
-      "Rédaction du rapport…",
-      "Vérification par le conseil des jardiniers…",
-      "Archivage dans la biothèque…"
+    report: [
+      "Compiling measurements…",
+      "Cross-checking the zone history…",
+      "Assessing environmental risks…",
+      "Writing the report…",
+      "Review by the gardeners' council…",
+      "Archiving in the bio-library…"
     ]
   };
 
@@ -181,7 +181,7 @@
   var time = document.getElementById('sp-time');
   var title = document.getElementById('sp-title');
 
-  // Feuilles le long de la barre
+  // Leaves along the bar
   var leaves = [];
   for (var i = 1; i <= 11; i++) {
     var leaf = document.createElement('span');
@@ -212,8 +212,8 @@
       var max = parseFloat(form.dataset.loadingMax || 60);
       secs = min + Math.random() * (max - min);
     }
-    var list = MESSAGES[type] || MESSAGES.analyse;
-    title.textContent = form.dataset.loadingTitle || 'Chargement…';
+    var list = MESSAGES[type] || MESSAGES.analysis;
+    title.textContent = form.dataset.loadingTitle || 'Loading…';
     overlay.classList.add('sp-show');
     overlay.setAttribute('aria-hidden', 'false');
     pollen();
@@ -221,14 +221,14 @@
     var t0 = performance.now(), dur = secs * 1000, lastMsg = -1;
     function frame(now) {
       var t = Math.min(1, (now - t0) / dur);
-      // progression organique : rapide au début, ralentit, puis finit
+      // organic progress: fast at first, slows down, then finishes
       var p = 0.55 * t + 0.45 * (0.5 - Math.cos(Math.PI * t) / 2);
       var val = Math.round(p * 100);
       fill.style.width = val + '%';
       sprout.style.left = val + '%';
       track.setAttribute('aria-valuenow', val);
       pct.textContent = val + ' %';
-      time.textContent = t < 1 ? Math.ceil((dur - (now - t0)) / 1000) + ' s restantes' : '';
+      time.textContent = t < 1 ? Math.ceil((dur - (now - t0)) / 1000) + ' s left' : '';
       leaves.forEach(function (l) { if (val >= +l.dataset.at) l.classList.add('sp-grown'); });
 
       var idx = Math.min(list.length - 1, Math.floor(t * list.length));
@@ -238,7 +238,7 @@
         requestAnimationFrame(frame);
       } else {
         overlay.querySelector('.sp-card').classList.add('sp-done');
-        msg.textContent = '🌱 Terminé !';
+        msg.textContent = '🌱 Done!';
         setTimeout(function () { HTMLFormElement.prototype.submit.call(form); }, 600);
       }
     }

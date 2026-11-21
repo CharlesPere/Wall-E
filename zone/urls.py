@@ -14,6 +14,5 @@ urlpatterns = [
     path('zone/new/', ZoneCreateView.as_view(), name='zone-create'),
     path('zone/<int:pk>/update/', ZoneUpdateView.as_view(), name='zone-update'),
     path('zone/<int:pk>/delete/', ZoneDeleteView.as_view(), name='zone-delete'),
-    path('zone/<int:pk>/traitement/', views.zone_traitement, name='zone-traitement'),
     path('about/', views.about, name='zone-about'),
 ]

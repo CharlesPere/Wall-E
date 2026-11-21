@@ -1,0 +1,24 @@
+{% extends "zone/base.html" %}
+{% block content %}
+  <article class="media content-section">
+    <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
+    <div class="media-body">
+      <div class="article-metadata">
+        <a class="mr-2" href="#">{{ object.author }}</a>
+        <small class="text-muted">{{ object.analysis_date|date:"d/m/Y H:i" }}</small>
+        <span class="badge {{ object.risk_badge }} ml-2">{{ object.get_risk_level_display }}</span>
+        <div>
+          <a class="btn btn-outline-secondary btn-sm mt-1 mb-1" href="{% url 'zone-analysis' object.zone.id %}">Back to analysis</a>
+          {% if object.author == user %}
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'report-update' object.id %}">Update</a>
+            <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'report-delete' object.id %}">Delete</a>
+          {% endif %}
+        </div>
+      </div>
+      <h2 class="article-title">{{ object.title }}</h2>
+      <p class="text-muted">Zone: {{ object.zone.name_zone }}</p>
+      <p class="article-content">{{ object.content|linebreaksbr }}</p>
+    </div>
+  </article>
+{% include "analysis/_risk_styles.html" %}
+{% endblock content %}

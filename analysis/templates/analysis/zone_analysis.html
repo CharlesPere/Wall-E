@@ -1,0 +1,127 @@
+{% extends "zone/base.html" %}
+{% block content %}
+<div class="content-section">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h2 class="mb-0">Analysis: {{ zone.name_zone }}</h2>
+      <small class="text-muted">{{ zone.localisation }} · {{ zone.get_type_area_display }} · {{ measurement_count }} measurement{{ measurement_count|pluralize }}</small>
+    </div>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'zone-detail' zone.id %}">Back to zone</a>
+  </div>
+
+  <div class="mt-3">
+    <form method="POST" action="{% url 'zone-run-analysis' zone.id %}" class="d-inline"
+          data-loading="analysis" data-loading-seconds="10"
+          data-loading-title="Robot mission: {{ zone.name_zone }}">
+      {% csrf_token %}
+      <button class="btn btn-info btn-sm" type="submit">Run analysis (robot)</button>
+    </form>
+    <a class="btn btn-success btn-sm" href="{% url 'report-create' zone.id %}">Create a report</a>
+  </div>
+</div>
+
+{% if latest %}
+<div class="content-section">
+  <h4>Latest measurement <small class="text-muted">{{ latest.date|date:"d/m/Y H:i" }}</small></h4>
+  <div class="row text-center">
+    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if latest.temperature > 40 %}risk-cell-{{ latest.risk_level }}{% endif %}"><small>Temperature</small><h5 class="mb-0">{{ latest.temperature }} °C</h5></div></div>
+    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if latest.humidity < 20 %}risk-cell-{{ latest.risk_level }}{% endif %}"><small>Humidity</small><h5 class="mb-0">{{ latest.humidity }} %</h5></div></div>
+    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if latest.oxygen < 18 %}risk-cell-{{ latest.risk_level }}{% endif %}"><small>Oxygen</small><h5 class="mb-0">{{ latest.oxygen }} %</h5></div></div>
+    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if latest.co2 > 1000 %}risk-cell-{{ latest.risk_level }}{% endif %}"><small>CO₂</small><h5 class="mb-0">{{ latest.co2|floatformat:0 }} ppm</h5></div></div>
+  </div>
+  {% if alerts %}
+    <div class="alert risk-alert-{{ latest.risk_level }} mb-0 mt-2">
+      <span class="badge risk-badge-{{ latest.risk_level }} mr-1">{{ latest.risk_label }}</span>
+      <strong>Detected problems:</strong>
+      {% for a in alerts %}<span class="badge risk-badge-{{ latest.risk_level }}">{{ a }}</span> {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert risk-alert-low mb-0 mt-2">No problem detected.</div>
+  {% endif %}
+</div>
+
+{% if farm %}
+<div class="content-section">
+  <h4>Farming stats <small class="text-muted">{{ zone.get_type_area_display }}</small></h4>
+  {% if latest_farm %}
+    <div class="row text-center">
+      <div class="col-md-4 mb-2"><div class="border rounded p-2 {% if latest_farm.yield_percent < 55 %}risk-cell-high{% elif latest_farm.yield_percent < 80 %}risk-cell-medium{% endif %}">
+        <small>{{ latest_farm.yield_label }}</small><h5 class="mb-0">{{ latest_farm.yield_percent|floatformat:0 }} %</h5></div></div>
+      <div class="col-md-4 mb-2"><div class="border rounded p-2">
+        <small>{{ latest_farm.harvest_label }}</small><h5 class="mb-0"><span class="badge {{ latest_farm.state_badge }}">{{ latest_farm.get_harvest_state_display }}</span></h5></div></div>
+      <div class="col-md-4 mb-2"><div class="border rounded p-2 {% if latest_farm.needs_fertilizer %}risk-cell-medium{% endif %}">
+        <small>{{ latest_farm.need_label }}</small><h5 class="mb-0">{{ latest_farm.needs_fertilizer|yesno:"Yes,No" }}</h5></div></div>
+    </div>
+    {% if latest_farm.alerts %}
+      <div class="alert risk-alert-{% if latest_farm.harvest_state == 'poor' %}high{% else %}medium{% endif %} mb-2 mt-2">
+        <strong>Farming problems:</strong>
+        {% for a, level in latest_farm.alerts %}<span class="badge risk-badge-{{ level }}">{{ a }}</span> {% endfor %}
+      </div>
+    {% else %}
+      <div class="alert risk-alert-low mb-2 mt-2">Harvest is healthy.</div>
+    {% endif %}
+  {% else %}
+    <p class="text-muted">No farming stats yet: run an analysis.</p>
+  {% endif %}
+  {% if farm_stats %}
+    <table class="table table-sm mb-0">
+      <tr><td>{% if zone.type_area == 'FISHING_AREA' %}Average fish stock{% else %}Average yield{% endif %}</td><td>{{ farm_stats.avg_yield|floatformat:0 }} %</td></tr>
+      <tr><td>Good {% if zone.type_area == 'FISHING_AREA' %}catches{% else %}harvests{% endif %}</td><td>{{ farm_stats.good }} / {{ farm_stats.count }}</td></tr>
+      <tr><td>Poor {% if zone.type_area == 'FISHING_AREA' %}catches{% else %}harvests{% endif %}</td><td>{{ farm_stats.poor }} / {{ farm_stats.count }}</td></tr>
+      <tr><td>{% if zone.type_area == 'FISHING_AREA' %}Restocking needs{% else %}Fertilizer needs{% endif %}</td><td>{{ farm_stats.fertilizer }} / {{ farm_stats.count }}</td></tr>
+    </table>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="content-section">
+  <h4>Statistics</h4>
+  <table class="table table-sm mb-0">
+    <thead><tr><th></th><th>Average</th><th>Min</th><th>Max</th></tr></thead>
+    <tbody>
+      <tr><td>Temperature (°C)</td><td>{{ stats.temperature.avg|floatformat:1 }}</td><td>{{ stats.temperature.min }}</td><td>{{ stats.temperature.max }}</td></tr>
+      <tr><td>Humidity (%)</td><td>{{ stats.humidity.avg|floatformat:1 }}</td><td>{{ stats.humidity.min }}</td><td>{{ stats.humidity.max }}</td></tr>
+      <tr><td>Oxygen (%)</td><td>{{ stats.oxygen.avg|floatformat:1 }}</td><td>{{ stats.oxygen.min }}</td><td>{{ stats.oxygen.max }}</td></tr>
+      <tr><td>CO₂ (ppm)</td><td>{{ stats.co2.avg|floatformat:0 }}</td><td>{{ stats.co2.min|floatformat:0 }}</td><td>{{ stats.co2.max|floatformat:0 }}</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="content-section">
+  <h4>Measurement history</h4>
+  <table class="table table-sm table-striped mb-0">
+    <thead><tr><th>Date</th><th>Temp</th><th>Hum.</th><th>O₂</th><th>CO₂</th>{% if farm %}<th>Yield</th>{% endif %}<th>Alerts</th></tr></thead>
+    <tbody>
+    {% for m in measurements %}
+      <tr>
+        <td>{{ m.date|date:"d/m H:i" }}</td><td>{{ m.temperature }}</td><td>{{ m.humidity }}</td><td>{{ m.oxygen }}</td><td>{{ m.co2|floatformat:0 }}</td>
+        {% if farm %}<td>{% if m.farm %}{{ m.farm.yield_percent|floatformat:0 }} %{% else %}-{% endif %}</td>{% endif %}
+        <td>{% for a in m.alerts %}<span class="badge risk-badge-{{ m.risk_level }}">{{ a }}</span> {% endfor %}
+            {% for a, level in m.farm_alerts %}<span class="badge risk-badge-{{ level }}">{{ a }}</span> {% endfor %}
+            {% if not m.alerts and not m.farm_alerts %}<span class="text-muted">-</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="content-section">
+  <p class="mb-0 text-muted">No measurement for this zone yet. Click "Run analysis (robot)".</p>
+</div>
+{% endif %}
+
+<div class="content-section">
+  <h4>Reports</h4>
+  {% for r in reports %}
+    <div class="border-bottom py-2">
+      <a href="{% url 'report-detail' r.id %}">{{ r.title }}</a>
+      <span class="badge {{ r.risk_badge }} ml-1">{{ r.get_risk_level_display }}</span>
+      <small class="text-muted ml-1">{{ r.analysis_date|date:"d/m/Y H:i" }} · {{ r.author }}</small>
+    </div>
+  {% empty %}
+    <p class="mb-0 text-muted">No reports.</p>
+  {% endfor %}
+</div>
+{% include "analysis/_risk_styles.html" %}
+{% include "analysis/_loading.html" %}
+{% endblock content %}

@@ -14,7 +14,13 @@ class Zone(models.Model):
         ("WOODS", "Woods"),
         ("RIVER", "River"),
         ("MEADOW", "Meadow"),
-        ("AGRICULTURE_FIELD", "Agriculture field")
+        ("AGRICULTURE_FIELD", "Agriculture field"),
+        ("ORCHARD", "Orchard"),
+        ("VEGETABLE_GARDEN", "Vegetable garden"),
+        ("FRUIT_TREES", "Fruit trees"),
+        ("FISHING_AREA", "Fishing area"),
+        ("CORN_FIELD", "Corn field"),
+        ("WHEAT_FIELD", "Wheat field"),
     ]
 
     user = models.ForeignKey(
@@ -53,5 +59,5 @@ class Zone(models.Model):
         return reverse('zone-detail', kwargs={'pk': self.pk})
     
     def __str__(self):
-        return self.user
+        return self.name_zone
 
