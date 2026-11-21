@@ -10,7 +10,6 @@ env/
 # Django stuff
 db.sqlite3
 db.sqlite3-journal
-media/
 
 # Environment variables
 .env
