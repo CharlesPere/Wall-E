@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import (
     ListView,
@@ -65,3 +66,15 @@ class ZoneDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 def about(request):
     return render(request, 'zone/about.html', {'title': 'About'})
+
+
+@login_required
+def zone_analyse(request, pk):
+    zone = get_object_or_404(Zone, pk=pk)
+    return render(request, 'zone/zone_analyse.html', {'zone': zone, 'title': 'Analyse'})
+
+
+@login_required
+def zone_traitement(request, pk):
+    zone = get_object_or_404(Zone, pk=pk)
+    return render(request, 'zone/zone_traitement.html', {'zone': zone, 'title': 'Traitement'})

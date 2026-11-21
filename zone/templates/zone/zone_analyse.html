@@ -1,0 +1,9 @@
+{% extends "zone/base.html" %}
+{% block content %}
+  <div class="content-section">
+    <h2>Analyse : {{ zone.name_zone }}</h2>
+    <p class="text-muted">{{ zone.localisation }}</p>
+    <p>Mesures et rapports d'analyse de cette zone (à venir).</p>
+    <a class="btn btn-outline-secondary btn-sm" href="{% url 'zone-home' %}">Retour</a>
+  </div>
+{% endblock content %}
