@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='zone',
             name='type',
-            field=models.CharField(choices=[('CHAMP', 'Champ'), ('BOIS', 'Bois'), ('RIVIERE', 'Rivière'), ('PRAIRIE', 'Prairie')], default='CHAMP', max_length=20),
+            field=models.CharField(choices=[('FIELD', 'Field'), ('WOODS', 'Woods'), ('RIVER', 'River'), ('MEADOW', 'Meadow')], default='FIELD', max_length=20),
         ),
     ]

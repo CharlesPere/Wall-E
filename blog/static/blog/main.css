@@ -1,22 +1,22 @@
 /* =========================================================
-   Wall-E — thème solarpunk
-   Palette : mousse, feuille, soleil, vert-de-gris, ciel
+   Wall-E — solarpunk theme
+   Palette: moss, leaf, sun, verdigris, sky
    ========================================================= */
  
 :root {
-  --moss:      #1F3D2B;   /* texte, navbar */
+  --moss:      #1F3D2B;   /* text, navbar */
   --moss-2:    #2C5A3E;
-  --leaf:      #4E8B3A;   /* actions principales */
+  --leaf:      #4E8B3A;   /* main actions */
   --leaf-soft: #DDEFCF;
-  --sun:       #F2B33D;   /* accent, soleil, focus */
+  --sun:       #F2B33D;   /* accent, sun, focus */
   --sun-soft:  #FFF1CC;
-  --verdigris: #2F9E8F;   /* données robots */
-  --sky:       #E4F3EE;   /* fond */
-  --paper:     #FBFDF7;   /* cartes */
-  --rust:      #B5502E;   /* zones critiques / danger */
+  --verdigris: #2F9E8F;   /* robot data */
+  --sky:       #E4F3EE;   /* background */
+  --paper:     #FBFDF7;   /* cards */
+  --rust:      #B5502E;   /* critical zones / danger */
   --ink-soft:  #5B6F60;
  
-  --radius-leaf: 22px 4px 22px 4px;   /* forme "feuille" */
+  --radius-leaf: 22px 4px 22px 4px;   /* "leaf" shape */
   --radius:      14px;
   --shadow:      0 6px 0 -2px rgba(31, 61, 43, .12);
  
@@ -33,7 +33,7 @@ body {
   line-height: 1.65;
   color: var(--moss);
   background-color: var(--sky);
-  /* motif discret de feuilles + halo de soleil en haut à droite */
+  /* subtle leaf pattern + sun halo in the top right */
   background-image:
     radial-gradient(circle at 92% -10%, rgba(242, 179, 61, .35), transparent 38%),
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%234E8B3A' stroke-opacity='.08' stroke-width='1.5'%3E%3Cpath d='M20 70c10-25 35-30 45-28-2 12-12 34-45 28z'/%3E%3Cpath d='M20 70 50 50'/%3E%3Cpath d='M85 25c6-12 20-14 26-12-1 7-8 18-26 12z'/%3E%3C/g%3E%3C/svg%3E");
@@ -70,7 +70,7 @@ ul { margin: 0; }
   border-radius: 6px;
 }
  
-/* ---------- Navbar (nom de classe conservé pour Bootstrap) ---------- */
+/* ---------- Navbar (class name kept for Bootstrap) ---------- */
  
 .bg-steel {
   background-color: var(--moss);
@@ -81,7 +81,7 @@ ul { margin: 0; }
   padding-bottom: .7rem;
 }
  
-/* bordure ondulée "colline" sous la navbar */
+/* wavy "hill" border under the navbar */
 .site-header .navbar::after {
   content: "";
   position: absolute;
@@ -103,7 +103,7 @@ ul { margin: 0; }
   letter-spacing: -0.02em;
 }
  
-/* Le soleil du logo : seul moment animé de la page */
+/* The logo sun: the only animated element on the page */
 .brand-sun {
   width: 34px;
   height: 34px;
@@ -146,7 +146,7 @@ ul { margin: 0; }
   background-color: var(--sun);
 }
  
-/* bouton d'action mis en avant dans la nav (ex. "Nouvelle zone") */
+/* highlighted action button in the nav (e.g. "New zone") */
 .site-header .navbar-nav .nav-link.nav-cta {
   background-color: var(--sun);
   color: var(--moss);
@@ -157,7 +157,7 @@ ul { margin: 0; }
   background-color: var(--sun-soft);
 }
  
-/* ---------- Bandeau d'accueil ---------- */
+/* ---------- Home banner ---------- */
  
 .hero {
   position: relative;
@@ -181,7 +181,7 @@ ul { margin: 0; }
   font-size: 1.15rem;
 }
  
-/* collines stylisées en bas du bandeau */
+/* stylised hills at the bottom of the banner */
 .hero::after {
   content: "";
   position: absolute;
@@ -211,7 +211,7 @@ ul { margin: 0; }
   line-height: 1;
 }
  
-/* ---------- Sections / cartes ---------- */
+/* ---------- Sections / cards ---------- */
  
 .content-section {
   background: var(--paper);
@@ -228,7 +228,7 @@ ul { margin: 0; }
   color: var(--moss);
 }
  
-/* ---------- Articles / relevés (classes existantes conservées) ---------- */
+/* ---------- Articles / readings (existing classes kept) ---------- */
  
 .article-title {
   font-family: var(--font-display);
@@ -273,7 +273,7 @@ a.article-title:hover {
   vertical-align: middle;
 }
  
-/* ---------- Carte zone ---------- */
+/* ---------- Zone card ---------- */
  
 .zone-card {
   position: relative;
@@ -291,7 +291,7 @@ a.article-title:hover {
   border-color: var(--leaf);
 }
  
-/* jauge verticale de pollution à gauche de la carte */
+/* vertical pollution gauge on the left of the card */
 .zone-card::before {
   content: "";
   position: absolute;
@@ -306,7 +306,7 @@ a.article-title:hover {
  
 .zone-card h3 { margin-bottom: .25rem; }
  
-/* ---------- Badges d'état ---------- */
+/* ---------- Status badges ---------- */
  
 .badge-state {
   display: inline-flex;
@@ -330,7 +330,7 @@ a.article-title:hover {
 .badge-en-cours  { background: var(--sun-soft); color: #6B4A05; }
 .badge-traitee   { background: var(--leaf-soft); color: #234A17; }
  
-/* Robot en ligne : point qui "respire" */
+/* Robot online: "breathing" dot */
 .robot-status {
   display: inline-flex;
   align-items: center;
@@ -358,7 +358,7 @@ a.article-title:hover {
   100% { box-shadow: 0 0 0 0 rgba(47, 158, 143, 0); }
 }
  
-/* Barre de mesure (niveau de pollution, qualité de l'air...) */
+/* Measurement bar (pollution level, air quality...) */
 .meter {
   height: 10px;
   background: var(--leaf-soft);
@@ -377,7 +377,7 @@ a.article-title:hover {
 .zone-moyen .meter > span    { background: var(--sun); }
 .zone-critique .meter > span { background: var(--rust); }
  
-/* ---------- Boutons (surcharge Bootstrap) ---------- */
+/* ---------- Buttons (Bootstrap override) ---------- */
  
 .btn {
   font-weight: 700;
@@ -430,7 +430,7 @@ a.article-title:hover {
   color: var(--ink-soft);
 }
  
-/* ---------- Formulaires ---------- */
+/* ---------- Forms ---------- */
  
 .form-control {
   border: 2px solid var(--leaf-soft);
@@ -446,7 +446,7 @@ a.article-title:hover {
  
 label { font-weight: 700; }
  
-/* ---------- Alertes Django messages ---------- */
+/* ---------- Django message alerts ---------- */
  
 .alert {
   border: none;
@@ -461,14 +461,14 @@ label { font-weight: 700; }
 .alert-danger,
 .alert-error   { background: #FBE3DA; color: #7A2E15; }
  
-/* ---------- Listes ---------- */
+/* ---------- Lists ---------- */
  
 .list-group-item {
   border-color: var(--leaf-soft);
   background: var(--paper);
 }
  
-/* ---------- Profil ---------- */
+/* ---------- Profile ---------- */
  
 .account-img {
   height: 125px;
@@ -484,7 +484,7 @@ label { font-weight: 700; }
   font-size: 2.5rem;
 }
  
-/* ---------- Pied de page ---------- */
+/* ---------- Footer ---------- */
  
 .site-footer {
   margin-top: 3rem;
@@ -505,7 +505,7 @@ label { font-weight: 700; }
  
 .site-footer a { color: var(--sun); }
  
-/* ---------- Responsive & accessibilité ---------- */
+/* ---------- Responsive & accessibility ---------- */
  
 @media (max-width: 767px) {
   body { margin-top: 5.5rem; }
