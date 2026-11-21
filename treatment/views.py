@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 
 from zone.models import Zone
 from .forms import InterventionForm
+from analysis.views import create_treated_measurement
 from .models import Intervention
 
 # Detected problem -> suggested robot, base time (h), suggested resources
@@ -16,6 +17,10 @@ ADVICE = {
     "Air pollution": ('filtration', 5, "CO2 filters, sensors"),
     "Poor harvest": ('farming', 8, "Seeds, harvesting tools"),
     "Needs fertilizer": ('farming', 3, "Natural fertilizer / compost"),
+    "Flood": ('multipurpose', 10, "Water pumps, sandbags"),
+    "Hail": ('multipurpose', 6, "Protective nets, seeds for replanting"),
+    "Storm": ('multipurpose', 8, "Chainsaws, tarps, stakes"),
+    "Insect invasion": ('multipurpose', 5, "Natural pest control, traps"),
 }
 
 
@@ -23,12 +28,14 @@ def suggestion(alerts):
     """Pre-fills the form based on the latest measurement's problems."""
     advice = [ADVICE[a] for a in alerts if a in ADVICE]
     if not advice:
-        return {'robot_type': 'multipurpose', 'estimated_hours': 2, 'robot_count': 1}
+        return {'estimated_hours': 2, 'robot_count': 1}
     if len(advice) == 1:
         robot, hours, resources = advice[0]
         return {'robot_type': robot, 'estimated_hours': hours, 'resources': resources, 'robot_count': 1, 'worker_count': 2}
+    robots = [a[0] for a in advice]
     return {
-        'robot_type': 'multipurpose',
+        # disaster => multipurpose robot, otherwise the robot of the first problem
+        'robot_type': 'multipurpose' if 'multipurpose' in robots else robots[0],
         'estimated_hours': sum(a[1] for a in advice),
         'resources': "\n".join(a[2] for a in advice),
         'robot_count': len(advice),
@@ -42,18 +49,21 @@ def zone_treatment(request, pk):
     latest = zone.measurements.first() if hasattr(zone, 'measurements') else None
     alerts = latest.alerts() if latest else []
     farm_alerts = latest.farm_alerts() if latest else []
+    disaster = latest.has_disaster() if latest else False
 
     if request.method == 'POST':
-        form = InterventionForm(request.POST)
+        form = InterventionForm(request.POST, allow_multipurpose=disaster)
         if form.is_valid():
             intervention = form.save(commit=False)
             intervention.zone = zone
             intervention.author = request.user
+            intervention.problems = ", ".join(alerts + [a for a, _ in farm_alerts])
             intervention.save()
             messages.success(request, "Intervention planned.")
             return redirect('zone-treatment', pk=zone.pk)
     else:
-        form = InterventionForm(initial=suggestion(alerts + [a for a, _ in farm_alerts]))
+        form = InterventionForm(initial=suggestion(alerts + [a for a, _ in farm_alerts]),
+                                allow_multipurpose=disaster)
 
     return render(request, 'treatment/zone_treatment.html', {
         'title': 'Treatment',
@@ -61,6 +71,7 @@ def zone_treatment(request, pk):
         'latest': latest,
         'alerts': alerts,
         'farm_alerts': farm_alerts,
+        'disaster': disaster,
         'form': form,
         'interventions': zone.interventions.all(),
     })
@@ -73,9 +84,14 @@ def intervention_advance(request, pk):
     intervention = get_object_or_404(Intervention, pk=pk)
     if intervention.status == 'planned':
         intervention.status = 'in_progress'
+        intervention.started_at = timezone.now()
     elif intervention.status == 'in_progress':
         intervention.status = 'done'
         intervention.ended_at = timezone.now()
+        intervention.immunity_runs = Intervention.IMMUNITY_RUNS
+        if intervention.problem_list():
+            create_treated_measurement(intervention.zone, intervention.problem_list())
+            messages.success(request, "Intervention done: " + intervention.problems + " resolved.")
     intervention.save()
     return redirect('zone-treatment', pk=intervention.zone.pk)
 

@@ -20,7 +20,7 @@
       <div class="alert risk-alert-low mb-0 mt-3">No problem detected in the latest measurement.</div>
     {% endif %}
     {% if farm_alerts %}
-      <div class="alert risk-alert-high mb-0 mt-2">
+      <div class="alert risk-alert-{% if disaster %}critical{% else %}high{% endif %} mb-0 mt-2">
         <strong>Farming problems:</strong>
         {% for a, level in farm_alerts %}<span class="badge risk-badge-{{ level }}">{{ a }}</span> {% endfor %}
       </div>
@@ -35,6 +35,9 @@
     {% csrf_token %}
     <fieldset class="form-group">
       <legend class="border-bottom mb-4">Plan an intervention</legend>
+      {% if disaster %}
+        <p class="small mb-3"><span class="badge risk-badge-critical">Natural disaster</span> Multipurpose robots are available for this zone.</p>
+      {% endif %}
       {{ form|crispy }}
     </fieldset>
     <button class="btn btn-outline-info" type="submit">Send the robots</button>
@@ -53,14 +56,16 @@
             {{ i.robot_count }} robot{{ i.robot_count|pluralize }} · {{ i.worker_count }} worker{{ i.worker_count|pluralize }} · {{ i.estimated_hours }} h estimated
             · created {{ i.created_at|date:"d/m/Y H:i" }}{% if i.ended_at %} · finished {{ i.ended_at|date:"d/m/Y H:i" }}{% endif %}
           </small>
+          {% if i.problems %}<div class="small mt-1"><em>Treats:</em> {{ i.problems }}
+            {% if i.status == 'done' and i.immunity_runs %}<span class="badge risk-badge-low ml-1">protected for {{ i.immunity_runs }} more analys{{ i.immunity_runs|pluralize:"is,es" }}</span>{% endif %}</div>{% endif %}
           {% if i.resources %}<div class="small mt-1"><em>Resources:</em> {{ i.resources|linebreaksbr }}</div>{% endif %}
           {% if i.comment %}<div class="small"><em>Comment:</em> {{ i.comment }}</div>{% endif %}
         </div>
         <div class="text-nowrap">
-          {% if i.status != 'done' %}
+          {% if i.status == 'planned' %}
             <form method="POST" action="{% url 'intervention-advance' i.id %}" class="d-inline">
               {% csrf_token %}
-              <button class="btn btn-sm btn-outline-success" type="submit">{% if i.status == 'planned' %}Start{% else %}Finish{% endif %}</button>
+              <button class="btn btn-sm btn-outline-success" type="submit">Start</button>
             </form>
           {% endif %}
           {% if i.author == user %}
@@ -71,10 +76,41 @@
           {% endif %}
         </div>
       </div>
+      {% if i.status == 'in_progress' %}
+        <div class="progress mt-2" style="height: 14px;">
+          <div class="progress-bar bg-success js-progress" role="progressbar" style="width: 0%;"
+               data-started="{{ i.started_ms }}" data-duration="{{ i.duration_seconds|stringformat:'s' }}"
+               data-form="finish-{{ i.id }}"></div>
+        </div>
+        <form method="POST" action="{% url 'intervention-advance' i.id %}" id="finish-{{ i.id }}" class="d-none">
+          {% csrf_token %}
+        </form>
+      {% endif %}
     </div>
   {% empty %}
     <p class="mb-0 text-muted">No interventions.</p>
   {% endfor %}
 </div>
 {% include "analysis/_risk_styles.html" %}
+<script>
+(function () {
+  // Progress bar: 1 estimated hour = 1 real second, then the intervention finishes by itself
+  var bars = document.querySelectorAll('.js-progress');
+  var finished = false;
+  function tick() {
+    bars.forEach(function (bar) {
+      var duration = parseFloat(bar.dataset.duration) * 1000;
+      var elapsed = Date.now() - parseInt(bar.dataset.started, 10);
+      var pct = Math.min(100, Math.max(0, elapsed / duration * 100));
+      bar.style.width = pct + '%';
+      if (pct >= 100 && !finished) {
+        finished = true;
+        document.getElementById(bar.dataset.form).submit();
+      }
+    });
+    if (!finished && bars.length) requestAnimationFrame(tick);
+  }
+  tick();
+})();
+</script>
 {% endblock content %}

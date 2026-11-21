@@ -29,13 +29,33 @@ class Intervention(models.Model):
     comment = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUSES, default='planned')
     created_at = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)
     ended_at = models.DateTimeField(null=True, blank=True)
+    # problems this intervention treats (comma-separated, snapshot at creation)
+    problems = models.TextField(blank=True)
+    # number of upcoming analyses during which these problems cannot come back
+    immunity_runs = models.PositiveIntegerField(default=0)
+
+    IMMUNITY_RUNS = 2
 
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
         return f"{self.get_robot_type_display()} - {self.zone.name_zone}"
+
+    @property
+    def started_ms(self):
+        """Start time in milliseconds (for the progress bar)."""
+        return int(self.started_at.timestamp() * 1000) if self.started_at else 0
+
+    @property
+    def duration_seconds(self):
+        """Simulation: 1 estimated hour = 1 real second."""
+        return self.estimated_hours
+
+    def problem_list(self):
+        return [p.strip() for p in self.problems.split(',') if p.strip()]
 
     @property
     def status_badge(self):
