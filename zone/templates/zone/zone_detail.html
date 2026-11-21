@@ -1,7 +1,6 @@
 {% extends "zone/base.html" %}
 {% block content %}
-  <article class="media content-section">
-    <img class="rounded-circle article-img" src="{{ object.user.profile.image.url }}">
+  <article class="media content-section">    <img class="rounded-circle article-img" src="{{ object.user.profile.image.url }}">
     <div class="media-body">
       <div class="article-metadata">
         <a class="mr-2" href="#">{{ object.user }}</a>
@@ -15,8 +14,43 @@
           {% endif %}
         </div>
       </div>
+
       <h2 class="article-title">{{ object.name_zone }}</h2>
+      <table class="table">
+        <tbody>
+            <tr>
+                <th>Location</th>
+                <td>{{ object.localisation }}</td>
+            </tr>
+            <tr>
+                <th>Area type</th>
+                <td>{{ object.type_area }}</td>
+            </tr>
+            <tr>
+                <th>Size</th>
+                <td>{{ object.size_zone }} ha</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{ object.statut }}</td>
+            </tr>
+            <tr>
+                <th>Created</th>
+                <td>{{ object.date_creation|date:"d/m/Y" }}</td>
+            </tr>
+        </tbody>
+      </table>
       <p class="article-content">{{ object.description }}</p>
+
     </div>
   </article>
 {% endblock content %}
+
+fields = [
+        'name_zone', 
+        'description',
+        'localisation', 
+        'size_zone',
+        'statut',
+        'type_area'
+    ]
