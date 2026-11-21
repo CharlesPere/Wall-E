@@ -16,8 +16,6 @@ ADVICE = {
     "Air pollution": ('filtration', 5, "CO2 filters, sensors"),
     "Poor harvest": ('farming', 8, "Seeds, harvesting tools"),
     "Needs fertilizer": ('farming', 3, "Natural fertilizer / compost"),
-    "Poor catch": ('aquaculture', 6, "Nets, sonar sensors"),
-    "Needs restocking": ('aquaculture', 5, "Fry, transport tanks"),
 }
 
 

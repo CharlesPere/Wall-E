@@ -10,7 +10,6 @@ class Intervention(models.Model):
         ('oxygenation', "Oxygenation robot (low oxygen)"),
         ('filtration', "Filtration robot (pollution)"),
         ('farming', "Farming robot (harvest / fertilizer)"),
-        ('aquaculture', "Aquaculture robot (restocking)"),
         ('multipurpose', "Multipurpose robot"),
     ]
     STATUSES = [

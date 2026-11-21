@@ -139,9 +139,9 @@ class ReportCreateView(LoginRequiredMixin, CreateView):
             lines += [
                 "",
                 f"Farming zone ({self.zone.get_type_area_display()})",
-                f"{farm.yield_label}: {farm.yield_percent:.0f} %",
-                f"{farm.harvest_label}: {farm.get_harvest_state_display()}",
-                f"{farm.need_label}: {'yes' if farm.needs_fertilizer else 'no'}",
+                f"Yield: {farm.yield_percent:.0f} %",
+                f"Harvest state: {farm.get_harvest_state_display()}",
+                f"Needs fertilizer: {'yes' if farm.needs_fertilizer else 'no'}",
                 "Farming problems: " + (", ".join(farm_alerts) if farm_alerts else "none"),
             ]
         return {

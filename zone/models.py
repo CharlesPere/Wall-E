@@ -16,11 +16,6 @@ class Zone(models.Model):
         ("MEADOW", "Meadow"),
         ("AGRICULTURE_FIELD", "Agriculture field"),
         ("ORCHARD", "Orchard"),
-        ("VEGETABLE_GARDEN", "Vegetable garden"),
-        ("FRUIT_TREES", "Fruit trees"),
-        ("FISHING_AREA", "Fishing area"),
-        ("CORN_FIELD", "Corn field"),
-        ("WHEAT_FIELD", "Wheat field"),
     ]
 
     user = models.ForeignKey(

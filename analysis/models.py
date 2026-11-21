@@ -11,10 +11,7 @@ MIN_OXYGEN = 18        # %   (below => low oxygen)
 MAX_CO2 = 1000         # ppm (above => air pollution)
 
 # Zone types that have extra farming stats
-FARM_TYPES = [
-    'AGRICULTURE_FIELD', 'ORCHARD', 'VEGETABLE_GARDEN', 'FRUIT_TREES',
-    'FISHING_AREA', 'CORN_FIELD', 'WHEAT_FIELD',
-]
+FARM_TYPES = ['AGRICULTURE_FIELD', 'ORCHARD']
 
 RISK_LEVELS = [
     ('low', 'Low'),
@@ -81,36 +78,20 @@ class FarmMeasurement(models.Model):
     ]
 
     measurement = models.OneToOneField(Measurement, on_delete=models.CASCADE, related_name='farm')
-    yield_percent = models.FloatField()       # % of expected yield (fish stock for fishing areas)
+    yield_percent = models.FloatField()       # % of expected yield
     harvest_state = models.CharField(max_length=10, choices=HARVEST_STATES)
-    needs_fertilizer = models.BooleanField(default=False)  # needs restocking for fishing areas
+    needs_fertilizer = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Farm - {self.measurement}"
-
-    @property
-    def fishing(self):
-        return self.measurement.zone.type_area == 'FISHING_AREA'
-
-    @property
-    def yield_label(self):
-        return "Fish stock" if self.fishing else "Yield"
-
-    @property
-    def harvest_label(self):
-        return "Catch state" if self.fishing else "Harvest state"
-
-    @property
-    def need_label(self):
-        return "Needs restocking" if self.fishing else "Needs fertilizer"
 
     def alerts(self):
         """[(problem, color level)]"""
         alerts = []
         if self.harvest_state == 'poor':
-            alerts.append(("Poor catch" if self.fishing else "Poor harvest", 'high'))
+            alerts.append(("Poor harvest", 'high'))
         if self.needs_fertilizer:
-            alerts.append((self.need_label, 'medium'))
+            alerts.append(("Needs fertilizer", 'medium'))
         return alerts
 
     @property

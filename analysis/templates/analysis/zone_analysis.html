@@ -46,11 +46,11 @@
   {% if latest_farm %}
     <div class="row text-center">
       <div class="col-md-4 mb-2"><div class="border rounded p-2 {% if latest_farm.yield_percent < 55 %}risk-cell-high{% elif latest_farm.yield_percent < 80 %}risk-cell-medium{% endif %}">
-        <small>{{ latest_farm.yield_label }}</small><h5 class="mb-0">{{ latest_farm.yield_percent|floatformat:0 }} %</h5></div></div>
+        <small>Yield</small><h5 class="mb-0">{{ latest_farm.yield_percent|floatformat:0 }} %</h5></div></div>
       <div class="col-md-4 mb-2"><div class="border rounded p-2">
-        <small>{{ latest_farm.harvest_label }}</small><h5 class="mb-0"><span class="badge {{ latest_farm.state_badge }}">{{ latest_farm.get_harvest_state_display }}</span></h5></div></div>
+        <small>Harvest state</small><h5 class="mb-0"><span class="badge {{ latest_farm.state_badge }}">{{ latest_farm.get_harvest_state_display }}</span></h5></div></div>
       <div class="col-md-4 mb-2"><div class="border rounded p-2 {% if latest_farm.needs_fertilizer %}risk-cell-medium{% endif %}">
-        <small>{{ latest_farm.need_label }}</small><h5 class="mb-0">{{ latest_farm.needs_fertilizer|yesno:"Yes,No" }}</h5></div></div>
+        <small>Needs fertilizer</small><h5 class="mb-0">{{ latest_farm.needs_fertilizer|yesno:"Yes,No" }}</h5></div></div>
     </div>
     {% if latest_farm.alerts %}
       <div class="alert risk-alert-{% if latest_farm.harvest_state == 'poor' %}high{% else %}medium{% endif %} mb-2 mt-2">
@@ -65,10 +65,10 @@
   {% endif %}
   {% if farm_stats %}
     <table class="table table-sm mb-0">
-      <tr><td>{% if zone.type_area == 'FISHING_AREA' %}Average fish stock{% else %}Average yield{% endif %}</td><td>{{ farm_stats.avg_yield|floatformat:0 }} %</td></tr>
-      <tr><td>Good {% if zone.type_area == 'FISHING_AREA' %}catches{% else %}harvests{% endif %}</td><td>{{ farm_stats.good }} / {{ farm_stats.count }}</td></tr>
-      <tr><td>Poor {% if zone.type_area == 'FISHING_AREA' %}catches{% else %}harvests{% endif %}</td><td>{{ farm_stats.poor }} / {{ farm_stats.count }}</td></tr>
-      <tr><td>{% if zone.type_area == 'FISHING_AREA' %}Restocking needs{% else %}Fertilizer needs{% endif %}</td><td>{{ farm_stats.fertilizer }} / {{ farm_stats.count }}</td></tr>
+      <tr><td>Average yield</td><td>{{ farm_stats.avg_yield|floatformat:0 }} %</td></tr>
+      <tr><td>Good harvests</td><td>{{ farm_stats.good }} / {{ farm_stats.count }}</td></tr>
+      <tr><td>Poor harvests</td><td>{{ farm_stats.poor }} / {{ farm_stats.count }}</td></tr>
+      <tr><td>Fertilizer needs</td><td>{{ farm_stats.fertilizer }} / {{ farm_stats.count }}</td></tr>
     </table>
   {% endif %}
 </div>
