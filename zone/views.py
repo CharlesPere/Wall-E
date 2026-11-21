@@ -18,11 +18,15 @@ def home(request):
     return render(request, 'zone/home.html', context)
 
 
-class ZoneListView(ListView):
+class ZoneListView(LoginRequiredMixin, ListView):
     model = Zone
     template_name = 'zone/home.html'  # <app>/<model>_<viewtype>.html
     context_object_name = 'zones'
     ordering = ['-date_creation']
+
+    def get_queryset(self):
+        # seulement les éléments de l'utilisateur connecté
+        return Zone.objects.filter(user=self.request.user).order_by('-date_creation')
 
 
 class ZoneDetailView(DetailView):
