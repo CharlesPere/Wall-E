@@ -11,13 +11,16 @@
 
   <div class="mt-3">
     <form method="POST" action="{% url 'zone-run-analysis' zone.id %}" class="d-inline"
-          data-loading="analysis" data-loading-seconds="10"
+          data-loading="analysis" data-loading-seconds="5"
           data-loading-title="Robot mission: {{ zone.name_zone }}">
       {% csrf_token %}
       <button class="btn btn-info btn-sm" type="submit">Run analysis (robot)</button>
     </form>
     <a class="btn btn-success btn-sm" href="{% url 'report-create' zone.id %}">Create a report</a>
   </div>
+  {% if immune %}
+    <p class="small text-muted mb-0 mt-2">Recently treated, protected for the next analyses: {{ immune|join:", " }}</p>
+  {% endif %}
 </div>
 
 {% if latest %}
@@ -44,6 +47,12 @@
 <div class="content-section">
   <h4>Farming stats <small class="text-muted">{{ zone.get_type_area_display }}</small></h4>
   {% if latest_farm %}
+    {% if latest_farm.disaster %}
+      <div class="alert risk-alert-critical mb-3">
+        <span class="badge risk-badge-critical mr-1">Natural disaster</span>
+        <strong>{{ latest_farm.get_disaster_display }}</strong> hit the zone. Multipurpose robots are available in Treatment.
+      </div>
+    {% endif %}
     <div class="row text-center">
       <div class="col-md-4 mb-2"><div class="border rounded p-2 {% if latest_farm.yield_percent < 55 %}risk-cell-high{% elif latest_farm.yield_percent < 80 %}risk-cell-medium{% endif %}">
         <small>Yield</small><h5 class="mb-0">{{ latest_farm.yield_percent|floatformat:0 }} %</h5></div></div>
@@ -53,7 +62,7 @@
         <small>Needs fertilizer</small><h5 class="mb-0">{{ latest_farm.needs_fertilizer|yesno:"Yes,No" }}</h5></div></div>
     </div>
     {% if latest_farm.alerts %}
-      <div class="alert risk-alert-{% if latest_farm.harvest_state == 'poor' %}high{% else %}medium{% endif %} mb-2 mt-2">
+      <div class="alert risk-alert-{% if latest_farm.disaster %}critical{% elif latest_farm.harvest_state == 'poor' %}high{% else %}medium{% endif %} mb-2 mt-2">
         <strong>Farming problems:</strong>
         {% for a, level in latest_farm.alerts %}<span class="badge risk-badge-{{ level }}">{{ a }}</span> {% endfor %}
       </div>
@@ -69,6 +78,7 @@
       <tr><td>Good harvests</td><td>{{ farm_stats.good }} / {{ farm_stats.count }}</td></tr>
       <tr><td>Poor harvests</td><td>{{ farm_stats.poor }} / {{ farm_stats.count }}</td></tr>
       <tr><td>Fertilizer needs</td><td>{{ farm_stats.fertilizer }} / {{ farm_stats.count }}</td></tr>
+      <tr><td>Natural disasters</td><td>{{ farm_stats.disasters }} / {{ farm_stats.count }}</td></tr>
     </table>
   {% endif %}
 </div>

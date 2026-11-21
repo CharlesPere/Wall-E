@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DeleteView, DetailView, UpdateView
 
 from zone.models import Zone
+from treatment.models import Intervention
 from .models import FarmMeasurement, Measurement, Report, is_farm
 
 FIELDS = ['temperature', 'humidity', 'oxygen', 'co2']
@@ -26,8 +27,10 @@ RANGES = {
     'co2':         ((350, 950), (1050, 1800)),  # > 1000 => air pollution
 }
 
-# Farming zones: 25 % chance of a harvest problem
+# Farming zones: 25 % chance of a harvest problem, 20 % chance of a natural disaster
 FARM_PROBLEM_PROBABILITY = 25
+DISASTER_PROBABILITY = 20
+DISASTERS = ['flood', 'hail', 'storm', 'insects']
 
 
 def generate_values():
@@ -43,6 +46,18 @@ def generate_values():
 
 
 def generate_farm_values():
+    values = generate_harvest_values()
+    values['disaster'] = ''
+    if random.uniform(0, 100) < DISASTER_PROBABILITY:
+        # a disaster damages the harvest
+        values['disaster'] = random.choice(DISASTERS)
+        values['yield_percent'] = round(values['yield_percent'] * 0.6)
+        if values['harvest_state'] == 'good':
+            values['harvest_state'] = 'average'
+    return values
+
+
+def generate_harvest_values():
     if random.uniform(0, 100) >= FARM_PROBLEM_PROBABILITY:
         return {'yield_percent': round(random.uniform(80, 110)), 'harvest_state': 'good', 'needs_fertilizer': False}
     problem = random.choice(['harvest', 'fertilizer', 'both'])
@@ -51,6 +66,68 @@ def generate_farm_values():
     if problem == 'fertilizer':
         return {'yield_percent': round(random.uniform(55, 78)), 'harvest_state': 'average', 'needs_fertilizer': True}
     return {'yield_percent': round(random.uniform(15, 45)), 'harvest_state': 'poor', 'needs_fertilizer': True}
+
+
+# Problem -> measurement field it comes from
+PROBLEM_FIELDS = {
+    "Fire risk": 'temperature',
+    "Drought": 'humidity',
+    "Low oxygen": 'oxygen',
+    "Air pollution": 'co2',
+}
+DISASTER_LABELS = dict(FarmMeasurement.DISASTERS)
+
+
+def normal_value(field):
+    low, high = RANGES[field][0]
+    value = round(random.uniform(low, high), 1)
+    return round(value) if field == 'co2' else value
+
+
+def heal(values, farm_values, problems):
+    """Removes the given problems from generated values (in place)."""
+    for problem in problems:
+        if problem in PROBLEM_FIELDS:
+            values[PROBLEM_FIELDS[problem]] = normal_value(PROBLEM_FIELDS[problem])
+    if farm_values is None:
+        return
+    if farm_values.get('disaster') and DISASTER_LABELS[farm_values['disaster']] in problems:
+        farm_values['disaster'] = ''
+    if "Needs fertilizer" in problems:
+        farm_values['needs_fertilizer'] = False
+    if "Poor harvest" in problems and farm_values['harvest_state'] == 'poor':
+        farm_values['harvest_state'] = 'average'
+        farm_values['yield_percent'] = round(random.uniform(55, 78))
+    if (farm_values['harvest_state'] == 'average' and not farm_values['needs_fertilizer']
+            and not farm_values.get('disaster')):
+        farm_values['harvest_state'] = 'good'
+        farm_values['yield_percent'] = round(random.uniform(80, 110))
+
+
+def immune_problems(zone):
+    """Problems recently treated in this zone that cannot come back yet."""
+    problems = set()
+    for intervention in Intervention.objects.filter(zone=zone, status='done', immunity_runs__gt=0):
+        problems.update(intervention.problem_list())
+    return problems
+
+
+def create_treated_measurement(zone, problems):
+    """After a finished intervention: copy of the latest measurement without the treated problems."""
+    latest = zone.measurements.first()
+    if not latest:
+        return None
+    values = {f: getattr(latest, f) for f in FIELDS}
+    old_farm = getattr(latest, 'farm', None)
+    farm_values = None
+    if old_farm:
+        farm_values = {'yield_percent': old_farm.yield_percent, 'harvest_state': old_farm.harvest_state,
+                       'needs_fertilizer': old_farm.needs_fertilizer, 'disaster': old_farm.disaster}
+    heal(values, farm_values, problems)
+    measurement = Measurement.objects.create(zone=zone, **values)
+    if farm_values is not None:
+        FarmMeasurement.objects.create(measurement=measurement, **farm_values)
+    return measurement
 
 
 @login_required
@@ -81,6 +158,7 @@ def zone_analysis(request, pk):
                 'good': farm_qs.filter(harvest_state='good').count(),
                 'poor': farm_qs.filter(harvest_state='poor').count(),
                 'fertilizer': farm_qs.filter(needs_fertilizer=True).count(),
+                'disasters': farm_qs.exclude(disaster='').count(),
             }
 
     return render(request, 'analysis/zone_analysis.html', {
@@ -95,6 +173,7 @@ def zone_analysis(request, pk):
         'measurement_count': measurements.count(),
         'measurements': measurements[:15],
         'reports': zone.reports.all(),
+        'immune': sorted(immune_problems(zone)),
     })
 
 
@@ -103,9 +182,19 @@ def zone_analysis(request, pk):
 def run_analysis(request, pk):
     """Robot simulation: generates a random measurement."""
     zone = get_object_or_404(Zone, pk=pk)
-    measurement = Measurement.objects.create(zone=zone, **generate_values())
-    if is_farm(zone):
-        FarmMeasurement.objects.create(measurement=measurement, **generate_farm_values())
+    values = generate_values()
+    farm_values = generate_farm_values() if is_farm(zone) else None
+
+    # recently treated problems cannot come back for a few analyses
+    immune = immune_problems(zone)
+    heal(values, farm_values, immune)
+    for intervention in Intervention.objects.filter(zone=zone, status='done', immunity_runs__gt=0):
+        intervention.immunity_runs -= 1
+        intervention.save(update_fields=['immunity_runs'])
+
+    measurement = Measurement.objects.create(zone=zone, **values)
+    if farm_values is not None:
+        FarmMeasurement.objects.create(measurement=measurement, **farm_values)
     messages.success(request, "The robot sent back a new measurement.")
     return redirect('zone-analysis', pk=zone.pk)
 
@@ -142,6 +231,7 @@ class ReportCreateView(LoginRequiredMixin, CreateView):
                 f"Yield: {farm.yield_percent:.0f} %",
                 f"Harvest state: {farm.get_harvest_state_display()}",
                 f"Needs fertilizer: {'yes' if farm.needs_fertilizer else 'no'}",
+                f"Natural disaster: {farm.get_disaster_display() if farm.disaster else 'none'}",
                 "Farming problems: " + (", ".join(farm_alerts) if farm_alerts else "none"),
             ]
         return {

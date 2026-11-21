@@ -68,6 +68,10 @@ class Measurement(models.Model):
         farm = getattr(self, 'farm', None)
         return farm.alerts() if farm else []
 
+    def has_disaster(self):
+        farm = getattr(self, 'farm', None)
+        return bool(farm and farm.disaster)
+
 
 class FarmMeasurement(models.Model):
     """Extra stats for farming zones, linked to a measurement."""
@@ -77,10 +81,18 @@ class FarmMeasurement(models.Model):
         ('poor', 'Poor'),
     ]
 
+    DISASTERS = [
+        ('flood', 'Flood'),
+        ('hail', 'Hail'),
+        ('storm', 'Storm'),
+        ('insects', 'Insect invasion'),
+    ]
+
     measurement = models.OneToOneField(Measurement, on_delete=models.CASCADE, related_name='farm')
     yield_percent = models.FloatField()       # % of expected yield
     harvest_state = models.CharField(max_length=10, choices=HARVEST_STATES)
     needs_fertilizer = models.BooleanField(default=False)
+    disaster = models.CharField(max_length=10, choices=DISASTERS, blank=True, default='')
 
     def __str__(self):
         return f"Farm - {self.measurement}"
@@ -88,6 +100,8 @@ class FarmMeasurement(models.Model):
     def alerts(self):
         """[(problem, color level)]"""
         alerts = []
+        if self.disaster:
+            alerts.append((self.get_disaster_display(), 'critical'))
         if self.harvest_state == 'poor':
             alerts.append(("Poor harvest", 'high'))
         if self.needs_fertilizer:
