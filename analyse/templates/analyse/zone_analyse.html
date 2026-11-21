@@ -24,15 +24,19 @@
 <div class="content-section">
   <h4>Dernière mesure <small class="text-muted">{{ derniere.date|date:"d/m/Y H:i" }}</small></h4>
   <div class="row text-center">
-    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if derniere.temperature > 40 %}border-danger text-danger{% endif %}"><small>Température</small><h5 class="mb-0">{{ derniere.temperature }} °C</h5></div></div>
-    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if derniere.humidite < 20 %}border-danger text-danger{% endif %}"><small>Humidité</small><h5 class="mb-0">{{ derniere.humidite }} %</h5></div></div>
-    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if derniere.oxygene < 18 %}border-danger text-danger{% endif %}"><small>Oxygène</small><h5 class="mb-0">{{ derniere.oxygene }} %</h5></div></div>
-    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if derniere.co2 > 1000 %}border-danger text-danger{% endif %}"><small>CO₂</small><h5 class="mb-0">{{ derniere.co2|floatformat:0 }} ppm</h5></div></div>
+    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if derniere.temperature > 40 %}risk-cell-{{ derniere.niveau_risque }}{% endif %}"><small>Température</small><h5 class="mb-0">{{ derniere.temperature }} °C</h5></div></div>
+    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if derniere.humidite < 20 %}risk-cell-{{ derniere.niveau_risque }}{% endif %}"><small>Humidité</small><h5 class="mb-0">{{ derniere.humidite }} %</h5></div></div>
+    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if derniere.oxygene < 18 %}risk-cell-{{ derniere.niveau_risque }}{% endif %}"><small>Oxygène</small><h5 class="mb-0">{{ derniere.oxygene }} %</h5></div></div>
+    <div class="col-6 col-md-3 mb-2"><div class="border rounded p-2 {% if derniere.co2 > 1000 %}risk-cell-{{ derniere.niveau_risque }}{% endif %}"><small>CO₂</small><h5 class="mb-0">{{ derniere.co2|floatformat:0 }} ppm</h5></div></div>
   </div>
   {% if alertes %}
-    <div class="alert alert-danger mb-0 mt-2"><strong>Problèmes détectés :</strong> {{ alertes|join:", " }}</div>
+    <div class="alert risk-alert-{{ derniere.niveau_risque }} mb-0 mt-2">
+      <span class="badge risk-badge-{{ derniere.niveau_risque }} mr-1">{{ derniere.libelle_risque }}</span>
+      <strong>Problèmes détectés :</strong>
+      {% for a in alertes %}<span class="badge risk-badge-{{ derniere.niveau_risque }}">{{ a }}</span> {% endfor %}
+    </div>
   {% else %}
-    <div class="alert alert-success mb-0 mt-2">Aucun problème détecté.</div>
+    <div class="alert risk-alert-faible mb-0 mt-2">Aucun problème détecté.</div>
   {% endif %}
 </div>
 
@@ -57,7 +61,7 @@
     {% for m in mesures %}
       <tr>
         <td>{{ m.date|date:"d/m H:i" }}</td><td>{{ m.temperature }}</td><td>{{ m.humidite }}</td><td>{{ m.oxygene }}</td><td>{{ m.co2|floatformat:0 }}</td>
-        <td>{% for a in m.alertes %}<span class="badge badge-danger">{{ a }}</span> {% empty %}<span class="text-muted">-</span>{% endfor %}</td>
+        <td>{% for a in m.alertes %}<span class="badge risk-badge-{{ m.niveau_risque }}">{{ a }}</span> {% empty %}<span class="text-muted">-</span>{% endfor %}</td>
       </tr>
     {% endfor %}
     </tbody>
@@ -74,12 +78,13 @@
   {% for r in rapports %}
     <div class="border-bottom py-2">
       <a href="{% url 'rapport-detail' r.id %}">{{ r.titre }}</a>
-      <span class="badge badge-{{ r.badge_risque }} ml-1">{{ r.get_niveau_risque_display }}</span>
+      <span class="badge {{ r.badge_risque }} ml-1">{{ r.get_niveau_risque_display }}</span>
       <small class="text-muted ml-1">{{ r.date_analyse|date:"d/m/Y H:i" }} · {{ r.auteur }}</small>
     </div>
   {% empty %}
     <p class="mb-0 text-muted">Aucun rapport.</p>
   {% endfor %}
 </div>
+{% include "analyse/_risk_styles.html" %}
 {% include "analyse/_loading.html" %}
 {% endblock content %}

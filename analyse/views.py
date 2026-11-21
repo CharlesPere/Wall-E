@@ -14,6 +14,30 @@ from .models import Mesure, Rapport
 
 CHAMPS = ['temperature', 'humidite', 'oxygene', 'co2']
 
+# Probabilité de chaque niveau de risque lors d'une analyse
+PROBA_NIVEAUX = {'faible': 30, 'moyen': 30, 'eleve': 25, 'critique': 15}
+# Nombre de problèmes par niveau
+NB_PROBLEMES = {'faible': [0], 'moyen': [1], 'eleve': [2], 'critique': [3, 4]}
+# Plages de valeurs : (normale, problématique)
+PLAGES = {
+    'temperature': ((15, 38), (41, 50)),      # > 40 => incendie
+    'humidite':    ((25, 80), (5, 19)),       # < 20 => sécheresse
+    'oxygene':     ((18.5, 21), (14, 17.5)),  # < 18 => manque d'oxygène
+    'co2':         ((350, 950), (1050, 1800)),  # > 1000 => pollution
+}
+
+
+def generer_valeurs():
+    niveau = random.choices(list(PROBA_NIVEAUX), weights=list(PROBA_NIVEAUX.values()))[0]
+    problemes = random.sample(CHAMPS, random.choice(NB_PROBLEMES[niveau]))
+    valeurs = {}
+    for champ in CHAMPS:
+        normale, probleme = PLAGES[champ]
+        bas, haut = probleme if champ in problemes else normale
+        valeurs[champ] = round(random.uniform(bas, haut), 1)
+    valeurs['co2'] = round(valeurs['co2'])
+    return valeurs
+
 
 def duree_analyse(zone):
     """Durée (en secondes) de la mission du robot, selon la zone.
@@ -57,13 +81,7 @@ def zone_analyse(request, pk):
 def lancer_analyse(request, pk):
     """Simulation du robot : génère une mesure aléatoire."""
     zone = get_object_or_404(Zone, pk=pk)
-    Mesure.objects.create(
-        zone=zone,
-        temperature=round(random.uniform(15, 48), 1),
-        humidite=round(random.uniform(5, 80), 1),
-        oxygene=round(random.uniform(15, 21), 1),
-        co2=round(random.uniform(350, 1600)),
-    )
+    Mesure.objects.create(zone=zone, **generer_valeurs())
     messages.success(request, "Le robot a remonté une nouvelle mesure.")
     return redirect('zone-analyse', pk=zone.pk)
 

@@ -37,6 +37,9 @@ class Mesure(models.Model):
             alertes.append("Pollution atmosphérique")
         return alertes
 
+    def libelle_risque(self):
+        return dict(Rapport.NIVEAUX_RISQUE)[self.niveau_risque()]
+
     def niveau_risque(self):
         n = len(self.alertes())
         if n == 0:
@@ -74,9 +77,4 @@ class Rapport(models.Model):
 
     @property
     def badge_risque(self):
-        return {
-            'faible': 'success',
-            'moyen': 'warning',
-            'eleve': 'danger',
-            'critique': 'dark',
-        }.get(self.niveau_risque, 'secondary')
+        return f"risk-badge-{self.niveau_risque}"

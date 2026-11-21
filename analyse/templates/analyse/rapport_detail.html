@@ -6,7 +6,7 @@
       <div class="article-metadata">
         <a class="mr-2" href="#">{{ object.auteur }}</a>
         <small class="text-muted">{{ object.date_analyse|date:"d/m/Y H:i" }}</small>
-        <span class="badge badge-{{ object.badge_risque }} ml-2">{{ object.get_niveau_risque_display }}</span>
+        <span class="badge {{ object.badge_risque }} ml-2">{{ object.get_niveau_risque_display }}</span>
         <div>
           <a class="btn btn-outline-secondary btn-sm mt-1 mb-1" href="{% url 'zone-analyse' object.zone.id %}">Retour à l'analyse</a>
           {% if object.auteur == user %}
@@ -20,4 +20,5 @@
       <p class="article-content">{{ object.contenu|linebreaksbr }}</p>
     </div>
   </article>
+{% include "analyse/_risk_styles.html" %}
 {% endblock content %}
